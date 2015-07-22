@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,20 +31,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class ClientGui extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField tfEingabe;
-	private JButton bSenden;
-	private JButton bBeenden;
 	private JScrollPane spTerminal;
 	private JLabel lTerminal;
+	private JButton bSenden;
+	private JButton bBeenden;
 	private JPanel pEingabe;
 
 	private String chatText;
-	
+
 	private Socket socket;
 	private OutputStream os;
 	private PrintWriter writer;
@@ -57,29 +59,22 @@ public class ClientGui extends JFrame {
 
 		int portWert;
 		String ipAdresse;
+		String password;
 
-		
 		JTextField tfIp = new JTextField();
 		JTextField tfPort = new JTextField();
 		JPasswordField pfPassword = new JPasswordField();
-		
-		
-		do {
-		
-		Object[] message = { "Ip-Adresse", tfIp, "Port", tfPort, "Password", pfPassword };
 
+		Object[] message = { "Ip-Adresse", tfIp, "Port", tfPort, "Password", pfPassword };
 
 		JOptionPane pane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		pane.createDialog(null, "Login").setVisible(true);
-	
 
-		} while (!pfPassword.getText().equals("123"));
-		
-		
 		ipAdresse = tfIp.getText();
 		portWert = Integer.parseInt(tfPort.getText());
-	
-		InetAddress ipAddress = InetAddress.getByName(ipAdresse);		
+		password = pfPassword.getText();
+
+		InetAddress ipAddress = InetAddress.getByName(ipAdresse);
 
 		socket = new Socket(ipAddress, portWert);
 
@@ -90,11 +85,13 @@ public class ClientGui extends JFrame {
 
 		inputStream = socket.getInputStream();
 		reader = new BufferedReader(new InputStreamReader(inputStream));
+		
+		schreibeAnServer(password);
 
 		setTitle("Terminal");
 
 		clientThread = new ClientThread(this);
-		
+
 		chatText = new String();
 		chatText = "";
 
@@ -112,8 +109,7 @@ public class ClientGui extends JFrame {
 		bBeenden = new JButton("Beenden");
 		bSenden = new JButton("Senden");
 		pEingabe = new JPanel();
-		
-		
+
 		lTerminal = new JLabel("Terminal");
 		spTerminal = new JScrollPane(lTerminal);
 
@@ -121,11 +117,13 @@ public class ClientGui extends JFrame {
 		pEingabe.add(bSenden);
 		pEingabe.add(bBeenden);
 
+
 		contentPane.add(spTerminal, BorderLayout.CENTER);
 		contentPane.add(pEingabe, BorderLayout.SOUTH);
-		
+
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+		
 		bBeenden.addActionListener(new ActionListener() {
 
 			@Override
@@ -152,7 +150,7 @@ public class ClientGui extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				try {
-					sendeZuServer(tfEingabe.getText());
+					schreibeAnServer(tfEingabe.getText());
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -162,55 +160,46 @@ public class ClientGui extends JFrame {
 
 			}
 		});
-
 		
 		
 		tfEingabe.addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent arg0) {
 
-
 				if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-					
 
 					try {
-						sendeZuServer(tfEingabe.getText());
+						schreibeAnServer(tfEingabe.getText());
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					
+
 					tfEingabe.setText("");
-					
+
 				}
-				
-				
+
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		});
-		
-		
-		
 
 	}
 
-	public void sendeZuServer(String msg) throws IOException {
+	public void schreibeAnServer(String msg) throws IOException {
 
 		writer.write(msg + "\n");
-		writer.flush();
-		writer.write("");
 		writer.flush();
 
 	}
@@ -219,13 +208,12 @@ public class ClientGui extends JFrame {
 
 		return reader.readLine();
 	}
-	
+
 	public void addChatText(String str) {
 
-		chatText += str +"<br>";
-		lTerminal.setText("<html>" +chatText +"</html>");
+		chatText += str + "<br>";
+		lTerminal.setText("<html>" + chatText + "</html>");
 
-		
 	}
 
 }

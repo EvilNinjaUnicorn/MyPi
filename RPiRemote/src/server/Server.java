@@ -1,11 +1,13 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
@@ -27,9 +29,12 @@ public class Server implements Runnable {
 	private BufferedReader reader;
 	private Socket socket;
 	private Process process;
+	private ServerLogin serverLogin;
 
 	public Server(Socket socket, int clientId, ServerLogin serverLogin)
 			throws IOException {
+
+		this.serverLogin = serverLogin;
 
 		thread = new Thread(this);
 
@@ -41,7 +46,21 @@ public class Server implements Runnable {
 		inputStream = socket.getInputStream();
 		reader = new BufferedReader(new InputStreamReader(inputStream));
 
-		thread.start();
+		String password = reader.readLine();
+
+		if (password.equals("123")) {
+
+			thread.start();
+			System.out.println("Login erfolgreich");
+			schreibeAnClient("Login erfolgreich");
+
+		} else {
+
+			this.serverLogin.remove(this);
+			System.out.println("Login fehlgeschlagen");
+			schreibeAnClient("Login fehlgeschlagen");
+
+		}
 
 	}
 
@@ -57,7 +76,7 @@ public class Server implements Runnable {
 
 					if (eingabe != "") {
 
-
+						System.out.println("Befehl: " + eingabe);
 
 						String cmd = "";
 						Vector<String> cmdsVektor = new Vector();
@@ -81,29 +100,33 @@ public class Server implements Runnable {
 
 						cmdsVektor.add(cmd);
 						String[] cmds = cmdsVektor.toArray(new String[cmdsVektor.size()]);
-						
+
 						process = Runtime.getRuntime().exec(cmds);
 						InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
 						BufferedReader cmdReader = new BufferedReader(inputStreamReader);
-						
+						//OutputStreamWriter outputStreamWriter = new OutputStreamWriter(process.getOutputStream());
+						//BufferedWriter cmdWriter = new BufferedWriter(outputStreamWriter);
+
 						String ausgabe;
-						
-						while((ausgabe = cmdReader.readLine()) != null) {
-							
-							schreibeMsg(ausgabe);
-							
+
+						while ((ausgabe = cmdReader.readLine()) != null) {
+
+							schreibeAnClient(ausgabe);
+
 						}
 						
-						process.destroy();
-
 					}
-
+				
 				}
+
+				process.destroy();
+				schreibeAnClient("-----------");
+
 			} catch (IOException e) {
 				if (process != null) {
 					process.destroy();
 				}
-				
+
 				e.printStackTrace();
 				continue;
 
@@ -121,7 +144,7 @@ public class Server implements Runnable {
 
 	}
 
-	public void schreibeMsg(String msg) {
+	public void schreibeAnClient(String msg) {
 
 		writer.write(msg + "\n");
 		writer.flush();

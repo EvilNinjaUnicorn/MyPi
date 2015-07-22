@@ -1,19 +1,22 @@
-package server;
+package client;
 
 import java.io.IOException;
 
-public class ServerStartklasse {
+public class RPiRemoteClientStartklasse {
 
 	public static void main(String[] args) {
-
-
+		
+		
 		try {
-			ServerLogin serverLogin = new ServerLogin();
+			ClientGui clientGui = new ClientGui();
+			clientGui.setVisible(true);
+			clientGui.setSize(600, 500);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	
 
 	}
 

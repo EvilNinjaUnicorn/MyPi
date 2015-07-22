@@ -41,4 +41,8 @@ public class ServerLogin {
 
 	}
 
+	public void remove(Object o) {
+		server.remove(o);
+	}
+
 }
