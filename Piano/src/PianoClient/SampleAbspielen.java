@@ -73,7 +73,7 @@ public class SampleAbspielen implements Runnable {
 
 			
 				try {
-					thread.sleep(2000);
+					thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
